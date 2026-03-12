@@ -4,7 +4,7 @@ An API for running cheap, fast pre-verification checks on Ghanaian IDs before yo
 
 ### Features
 
-- **Validate Personal TIN** via the public GRA endpoint (educational use only)
+- **Validate Personal TIN** via the public GRA endpoint 
 - **Validate Ghana Card by card number** via the same endpoint
 - **Extract MRZ data** from Ghana Card and Passport images
 - **Image enhancement pipeline** to improve OCR/MRZ quality
@@ -63,6 +63,11 @@ Run them with:
 make test
 ```
 
+### Future work
+
+- More robust data extraction for drivers' licenses (move away from brittle, line-based OCR parsing to a structured model or template-based approach).
+- Optional caching for GRA responses and/or expensive image-processing steps to reduce latency and external calls.
+
 ### Contributing
 
 - Keep the API surface small and focused.
@@ -70,6 +75,10 @@ make test
 - Do not commit any real personal data or secrets.
 
 Issues and small PRs are welcome. This project is intentionally lightweight so it is easy to understand and extend.
+
+### Acknowledgements
+
+Thanks to [@saviour123](https://github.com/saviour123) and [@benacq](https://github.com/benacq) for their work on the original closed-source ID service that inspired this project.
 
 ### Disclaimer
 
