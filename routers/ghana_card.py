@@ -4,11 +4,11 @@ import tempfile
 from pathlib import Path
 
 import aiofiles
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import JSONResponse
 
 from config import get_logger
-from models import MrzResponse
+from models import ApiResponse, MrzData
 from services.mrz import detect_and_extract_mrz
 
 router = APIRouter(tags=["ghana-card"])
@@ -16,13 +16,16 @@ router = APIRouter(tags=["ghana-card"])
 ACCEPTABLE_EXTENSIONS = {"png", "jpg", "jpeg"}
 
 
-@router.post("/validate-ghana-card", response_model=MrzResponse)
-async def validate_ghana_card(file: UploadFile = File(...)) -> JSONResponse:
+@router.post("/validate-ghana-card", response_model=ApiResponse, response_model_exclude_none=True)
+async def validate_ghana_card(file: UploadFile = File(...)) -> ApiResponse | JSONResponse:
     logger = get_logger()
 
     suffix = file.filename.split(".")[-1].lower()
     if suffix not in ACCEPTABLE_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="File type not supported")
+        return JSONResponse(
+            status_code=400,
+            content=ApiResponse(success=False, message="File type not supported. Accepted: png, jpg, jpeg").model_dump(exclude_none=True),
+        )
 
     try:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -33,11 +36,19 @@ async def validate_ghana_card(file: UploadFile = File(...)) -> JSONResponse:
 
             mrz_data = detect_and_extract_mrz(str(tmp_path))
             if mrz_data is None:
-                raise HTTPException(status_code=400, detail="Could not read data from image")
+                return JSONResponse(
+                    status_code=422,
+                    content=ApiResponse(success=False, message="Could not extract MRZ data from Ghana card image").model_dump(exclude_none=True),
+                )
 
-        return JSONResponse(content=MrzResponse(**mrz_data).model_dump())
-    except HTTPException:
-        raise
+        return ApiResponse(
+            success=True,
+            message="Ghana card MRZ data extracted successfully",
+            data=MrzData(**mrz_data).model_dump(),
+        )
     except Exception as exc:
         logger.error(f"Error processing ghana card image: {exc}")
-        raise HTTPException(status_code=400, detail="Could not read data from image")
+        return JSONResponse(
+            status_code=500,
+            content=ApiResponse(success=False, message="Internal error processing Ghana card image").model_dump(exclude_none=True),
+        )

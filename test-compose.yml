@@ -1,0 +1,11 @@
+---
+services:
+  app:
+    build: .
+    ports:
+      - "5080:80"
+    environment:
+      - OPEN_GHANA_ID_DEBUG=true
+    volumes:
+      - .:/app
+    command: ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80", "--reload"]

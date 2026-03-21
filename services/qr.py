@@ -6,10 +6,10 @@ from typing import Optional
 import cv2
 
 from config import get_logger
-from models import VotersIdResponse
+from models import VotersIdData
 
 
-def extract_voters_qr_data(image_path: str) -> Optional[VotersIdResponse]:
+def extract_voters_qr_data(image_path: str) -> Optional[VotersIdData]:
     logger = get_logger()
 
     image = cv2.imread(image_path)
@@ -36,7 +36,7 @@ def extract_voters_qr_data(image_path: str) -> Optional[VotersIdResponse]:
         dob = datetime.strptime(dob_raw, "%Y%m%d").date()
         registration_date = datetime.strptime(reg_date_raw, "%Y%m%d").date()
 
-        return VotersIdResponse(
+        return VotersIdData(
             first_name=first_name,
             last_name=last_name,
             gender=gender,

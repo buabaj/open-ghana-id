@@ -1,35 +1,25 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal
 
 from pydantic import BaseModel, Field
 
 
-class HealthResponse(BaseModel):
-    status: Literal["ok"] = "ok"
+class ApiResponse(BaseModel):
+    success: bool
     message: str
+    data: dict | None = None
 
 
 class TinRequest(BaseModel):
     tin_num: str = Field(..., description="Personal TIN (e.g. P0000000000)")
 
 
-class TinResponse(BaseModel):
-    success: bool
-    message: str
-
-
 class GhanaCardNumberRequest(BaseModel):
     card_num: str = Field(..., description="Ghana Card number (e.g. GHA-000000000-0)")
 
 
-class GhanaCardNumberResponse(BaseModel):
-    success: bool
-    message: str
-
-
-class MrzResponse(BaseModel):
+class MrzData(BaseModel):
     type: str
     confidence_score: int
     id_type: str
@@ -46,7 +36,7 @@ class MrzResponse(BaseModel):
     expiration_is_valid: bool
 
 
-class VotersIdResponse(BaseModel):
+class VotersIdData(BaseModel):
     first_name: str
     last_name: str
     gender: str
@@ -56,7 +46,7 @@ class VotersIdResponse(BaseModel):
     polling_station_code: str
 
 
-class DriversLicenseResponse(BaseModel):
+class DriversLicenseData(BaseModel):
     first_name: str
     last_name: str
     other_names: str

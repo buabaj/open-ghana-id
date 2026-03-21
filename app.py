@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-from config import get_logger, get_settings
-from models import HealthResponse
+from config import get_settings
+from models import ApiResponse
 from routers import (
     drivers_license,
     ghana_card,
@@ -34,11 +36,35 @@ app.add_middleware(
 )
 
 
-@app.get("/", response_model=HealthResponse)
-async def health() -> HealthResponse:
-    logger = get_logger()
-    logger.info("Open Ghana ID API started successfully.")
-    return HealthResponse(message="Welcome to the Open Ghana ID pre-verification API")
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Pydantic/FastAPI request validation errors → 400 with ApiResponse envelope."""
+    return JSONResponse(
+        status_code=400,
+        content=ApiResponse(success=False, message=str(exc.errors()[0]["msg"])).model_dump(exclude_none=True),
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Catch-all for unexpected errors → 500 with ApiResponse envelope."""
+    return JSONResponse(
+        status_code=500,
+        content=ApiResponse(success=False, message="Internal server error").model_dump(exclude_none=True),
+    )
+
+
+@app.get("/", response_model=ApiResponse, response_model_exclude_none=True)
+async def root() -> ApiResponse:
+    return ApiResponse(
+        success=True,
+        message="Welcome to the Open Ghana ID pre-verification API",
+    )
+
+
+@app.get("/health", response_model=ApiResponse, response_model_exclude_none=True)
+async def health() -> ApiResponse:
+    return ApiResponse(success=True, message="Service is healthy")
 
 
 app.include_router(passport.router)

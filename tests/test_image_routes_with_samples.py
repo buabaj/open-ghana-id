@@ -21,6 +21,9 @@ def test_validate_passport_with_sample(client):
         files = {"file": (file_path.name, f, "image/jpeg")}
         response = client.post("/validate-passport", files=files)
     assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"] is not None
 
 
 @pytest.mark.skip(reason="Requires local samples/*.jpg; enable when you add sample images")
@@ -32,6 +35,9 @@ def test_validate_ghana_card_with_sample(client):
         files = {"file": (file_path.name, f, "image/jpeg")}
         response = client.post("/validate-ghana-card", files=files)
     assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"] is not None
 
 
 @pytest.mark.skip(reason="Requires local samples/*.jpg; enable when you add sample images")
@@ -43,3 +49,6 @@ def test_validate_voters_id_with_sample(client):
         files = {"file": (file_path.name, f, "image/jpeg")}
         response = client.post("/validate-voters-id", files=files)
     assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["data"] is not None
