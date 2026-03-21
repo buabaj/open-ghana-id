@@ -6,7 +6,7 @@ import pytesseract
 from PIL import Image
 
 from config import get_logger
-from models import DriversLicenseResponse
+from models import DriversLicenseData
 
 
 def extract_ghana_card_number(image_path: str) -> Optional[str]:
@@ -21,7 +21,7 @@ def extract_ghana_card_number(image_path: str) -> Optional[str]:
         return None
 
 
-def serialize_drivers_license_data(text: str) -> Optional[DriversLicenseResponse]:
+def serialize_drivers_license_data(text: str) -> Optional[DriversLicenseData]:
     logger = get_logger()
 
     try:
@@ -41,7 +41,7 @@ def serialize_drivers_license_data(text: str) -> Optional[DriversLicenseResponse
         logger.error(f"Drivers license data serialization failed: {exc}")
         return None
 
-    return DriversLicenseResponse(
+    return DriversLicenseData(
         first_name=first_name,
         last_name=last_name,
         other_names=other_names,

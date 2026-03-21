@@ -12,11 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install uv
 
-COPY pyproject.toml README.md /app/
+COPY pyproject.toml uv.lock README.md /app/
 
 RUN uv sync --frozen
 
 COPY . /app
 
 CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80"]
-
